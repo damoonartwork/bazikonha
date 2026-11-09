@@ -128,10 +128,8 @@ main,.footer{position:relative;z-index:1}
 .header.is-scrolled{background:rgba(6,16,18,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
 .header__row{display:flex;align-items:center;gap:28px;height:84px}
 .brand{display:flex;align-items:center;gap:10px;flex:none}
-.brand__logo{
-  width:40px;height:40px;border-radius:10px;border:1.5px dashed rgba(212,255,42,.6);
-  display:grid;place-items:center;font-family:var(--en);font-size:8px;letter-spacing:1px;color:var(--lime);
-}
+.brand__logo{height:38px;width:auto;flex:none;transition:transform .4s var(--ease)}
+.brand:hover .brand__logo{transform:rotate(-6deg) scale(1.05)}
 .brand__name{font-weight:900;font-size:22px;letter-spacing:-.5px}
 .nav{margin-inline:auto}
 .nav__list{display:flex;gap:6px}
@@ -518,7 +516,7 @@ main,.footer{position:relative;z-index:1}
   .header__row{height:72px;gap:12px}
   .nav{top:72px}
   .brand__name{font-size:19px}
-  .brand__logo{width:34px;height:34px}
+  .brand__logo{height:30px}
   .icon-btn,.burger{width:40px;height:40px}
   .hero{padding-top:110px}
   .hero__title{letter-spacing:-1px}
