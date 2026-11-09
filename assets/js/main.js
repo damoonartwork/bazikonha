@@ -13,18 +13,18 @@
 
   /* ---------- Sample product data (replace with real data / API in phase 2) ---------- */
   const PRODUCTS = [
-    { name: "کنسول پلی‌استیشن ۵ اسلیم دیجیتال", img: "product-ps5-slim.webp", price: 191980000, old: 197980000, badges: ["ارسال رایگان", "۱۸ ماه گارانتی"] },
-    { name: "کنسول ایکس‌باکس سری X", img: "product-xbox-series-x.webp", price: 189500000, old: 199000000, badges: ["ارسال رایگان", "۱۸ ماه گارانتی"] },
-    { name: "کنسول نینتندو سوییچ OLED", img: "product-switch-oled.webp", price: 98900000, old: 109000000, badges: ["ارسال رایگان"] },
-    { name: "دسته DualSense پلی‌استیشن ۵", img: "product-dualsense.webp", price: 19480000, badges: ["اورجینال"] },
-    { name: "دسته بی‌سیم ایکس‌باکس", img: "product-xbox-controller.webp", price: 16900000, old: 18200000, badges: ["اورجینال"] },
-    { name: "هدست گیمینگ PULSE 3D", img: "product-pulse-headset.webp", price: 22800000, badges: ["صدای سه‌بعدی"] },
-    { name: "دسته DualShock 4 پلی‌استیشن ۴", img: "product-dualshock4.webp", price: 9800000, old: 11500000, badges: ["اورجینال"] },
-    { name: "پایه شارژ دوتایی دسته PS5", img: "product-charging-station.webp", price: 6480000, badges: ["پرفروش"] },
-    { name: "کیف حمل کنسول PS5 اسلیم", img: "product-ps5-case.webp", price: 4980000, old: 5900000, badges: ["ضد ضربه"] },
-    { name: "باتری قابل شارژ دسته ایکس‌باکس", img: "product-xbox-battery.webp", price: 3680000, badges: ["کابل USB-C"] },
-    { name: "دیسک بازی God of War Ragnarök برای PS5", img: "product-game-ps5.webp", price: 8980000, old: 11980000, badges: ["ارسال رایگان"] },
-    { name: "دیسک بازی Gears of War برای ایکس‌باکس", img: "product-game-xbox.webp", price: 6480000, old: 7480000, badges: ["ارسال رایگان"] },
+    { name: "کنسول پلی‌استیشن ۵ اسلیم دیجیتال", img: "assets/img/products/product-ps5-slim.webp", price: 191980000, old: 197980000, badges: ["ارسال رایگان", "۱۸ ماه گارانتی"] },
+    { name: "کنسول ایکس‌باکس سری X", img: "assets/img/products/product-xbox-series-x.webp", price: 189500000, old: 199000000, badges: ["ارسال رایگان", "۱۸ ماه گارانتی"] },
+    { name: "کنسول نینتندو سوییچ OLED", img: "assets/img/products/product-switch-oled.webp", price: 98900000, old: 109000000, badges: ["ارسال رایگان"] },
+    { name: "دسته DualSense پلی‌استیشن ۵", img: "assets/img/products/product-dualsense.webp", price: 19480000, badges: ["اورجینال"] },
+    { name: "دسته بی‌سیم ایکس‌باکس", img: "assets/img/products/product-xbox-controller.webp", price: 16900000, old: 18200000, badges: ["اورجینال"] },
+    { name: "هدست گیمینگ PULSE 3D", img: "assets/img/products/product-pulse-headset.webp", price: 22800000, badges: ["صدای سه‌بعدی"] },
+    { name: "دسته DualShock 4 پلی‌استیشن ۴", img: "assets/img/products/product-dualshock4.webp", price: 9800000, old: 11500000, badges: ["اورجینال"] },
+    { name: "پایه شارژ دوتایی دسته PS5", img: "assets/img/products/product-charging-station.webp", price: 6480000, badges: ["پرفروش"] },
+    { name: "کیف حمل کنسول PS5 اسلیم", img: "assets/img/products/product-ps5-case.webp", price: 4980000, old: 5900000, badges: ["ضد ضربه"] },
+    { name: "باتری قابل شارژ دسته ایکس‌باکس", img: "assets/img/products/product-xbox-battery.webp", price: 3680000, badges: ["کابل USB-C"] },
+    { name: "دیسک بازی God of War Ragnarök برای PS5", img: "assets/img/products/product-game-ps5.webp", price: 8980000, old: 11980000, badges: ["ارسال رایگان"] },
+    { name: "دیسک بازی Gears of War برای ایکس‌باکس", img: "assets/img/products/product-game-xbox.webp", price: 6480000, old: 7480000, badges: ["ارسال رایگان"] },
   ];
 
   const arrowSvg =
