@@ -4,8 +4,9 @@
  *
  * - After registering (My Account form) the customer is NOT logged in;
  *   a verification link is emailed instead.
- * - Login is blocked until the link is clicked (admins and accounts created
- *   before this feature are never blocked).
+ * - Login is blocked until the link is clicked — for EVERY account, old or
+ *   new, except the exempt emails below and administrators (so the site owner
+ *   can never be locked out).
  * - Accounts created during checkout keep their checkout session so the order
  *   isn't interrupted, but must verify before logging in next time.
  * - Clicking the link verifies the email and logs the customer in.
@@ -16,9 +17,35 @@ const BZK_EV_META   = '_bzk_email_verified';
 const BZK_EV_TOKEN  = '_bzk_email_token';
 const BZK_EV_EXPIRE = 2 * DAY_IN_SECONDS;
 
-/** Has this user still to verify? (only users we flagged) */
+/** Emails that never need verification */
+function bzk_ev_exempt_emails() {
+	return array( 'damoon.ahmady@gmail.com' );
+}
+
+/** Has this user still to verify? */
 function bzk_ev_pending( $user_id ) {
-	return '0' === (string) get_user_meta( $user_id, BZK_EV_META, true );
+	$user = get_userdata( $user_id );
+	if ( ! $user ) {
+		return false;
+	}
+	if ( in_array( strtolower( $user->user_email ), bzk_ev_exempt_emails(), true ) || user_can( $user, 'manage_options' ) ) {
+		return false;
+	}
+	return '1' !== (string) get_user_meta( $user_id, BZK_EV_META, true );
+}
+
+/** Send a link if the user has none yet (or it expired) — rate-limited */
+function bzk_ev_maybe_send( $user_id ) {
+	if ( get_transient( 'bzk_ev_wait_' . $user_id ) ) {
+		return false;
+	}
+	$data = get_user_meta( $user_id, BZK_EV_TOKEN, true );
+	if ( is_array( $data ) && ( time() - (int) $data['time'] ) < BZK_EV_EXPIRE ) {
+		return false;
+	}
+	bzk_ev_send( $user_id );
+	set_transient( 'bzk_ev_wait_' . $user_id, 1, 2 * MINUTE_IN_SECONDS );
+	return true;
 }
 
 function bzk_ev_send( $user_id ) {
@@ -62,11 +89,12 @@ add_filter( 'woocommerce_registration_redirect', fn() => wc_get_page_permalink( 
 
 /* 3. Block login until verified */
 add_filter( 'wp_authenticate_user', function ( $user ) {
-	if ( $user instanceof WP_User && bzk_ev_pending( $user->ID ) && ! user_can( $user, 'manage_options' ) ) {
+	if ( $user instanceof WP_User && bzk_ev_pending( $user->ID ) ) {
+		$sent   = bzk_ev_maybe_send( $user->ID );
 		$resend = wp_nonce_url( add_query_arg( 'bzk_resend', $user->ID, wc_get_page_permalink( 'myaccount' ) ), 'bzk_resend_' . $user->ID );
 		return new WP_Error(
 			'bzk_unverified',
-			'ایمیلت هنوز تأیید نشده. روی لینکی که برایت ایمیل کردیم بزن. <a href="' . esc_url( $resend ) . '">ارسال دوباره‌ی لینک</a>'
+			( $sent ? 'برای ورود، اول ایمیلت را تأیید کن. همین الان یک لینک تأیید به ایمیلت فرستادیم (پوشه Spam را هم ببین). ' : 'ایمیلت هنوز تأیید نشده. روی لینکی که برایت ایمیل کردیم بزن. ' ) . '<a href="' . esc_url( $resend ) . '">ارسال دوباره‌ی لینک</a>'
 		);
 	}
 	return $user;
@@ -119,6 +147,32 @@ add_action( 'template_redirect', function () {
 	}
 } );
 
+/* 4b. Already logged-in but unverified (old sessions) → log out on the account page */
+add_action( 'template_redirect', function () {
+	if ( ! is_user_logged_in() || ! function_exists( 'is_account_page' ) || ! is_account_page() || isset( $_GET['bzk_verify'] ) ) { // phpcs:ignore
+		return;
+	}
+	$uid = get_current_user_id();
+	if ( ! bzk_ev_pending( $uid ) || ! empty( WC()->session ) && WC()->session->get( 'bzk_checkout_account' ) ) {
+		return;
+	}
+	$sent = bzk_ev_maybe_send( $uid );
+	wp_logout();
+	if ( WC()->session ) {
+		WC()->session->set_customer_session_cookie( true );
+	}
+	wc_add_notice( ( $sent ? 'برای ادامه، ایمیلت را تأیید کن؛ یک لینک تأیید برایت فرستادیم.' : 'برای ادامه، ایمیلت را با لینکی که برایت فرستادیم تأیید کن.' ) . ' (پوشه Spam را هم ببین)', 'notice' );
+	wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+	exit;
+}, 5 );
+
+/* Accounts made at checkout may see their order in this session */
+add_action( 'woocommerce_created_customer', function () {
+	if ( did_action( 'woocommerce_checkout_process' ) && WC()->session ) {
+		WC()->session->set( 'bzk_checkout_account', 1 );
+	}
+}, 30 );
+
 /* 5. Reminder inside My Account for checkout-created, still unverified accounts */
 add_action( 'woocommerce_account_content', function () {
 	$uid = get_current_user_id();
@@ -137,8 +191,10 @@ add_filter( 'manage_users_custom_column', function ( $out, $col, $uid ) {
 	if ( 'bzk_ev' !== $col ) {
 		return $out;
 	}
-	$v = get_user_meta( $uid, BZK_EV_META, true );
-	return '0' === (string) $v ? '⏳ در انتظار' : ( '1' === (string) $v ? '✅ تأیید شده' : '—' );
+	if ( ! bzk_ev_pending( $uid ) ) {
+		return '1' === (string) get_user_meta( $uid, BZK_EV_META, true ) ? '✅ تأیید شده' : '— معاف';
+	}
+	return '⏳ در انتظار';
 }, 10, 3 );
 
 /* Drop WooCommerce's own "account created / login details sent" notice — ours replaces it */
