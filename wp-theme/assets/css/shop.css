@@ -265,3 +265,4 @@ input[type=checkbox],input[type=radio]{accent-color:var(--lime)}
 .woocommerce-account .woocommerce::before,.woocommerce-account .woocommerce::after,
 .woocommerce form.checkout::before,.woocommerce form.checkout::after,
 .woocommerce div.product::before,.woocommerce div.product::after{display:none}
+.entry--text a.btn,.entry--text a.btn:hover{color:#071006}

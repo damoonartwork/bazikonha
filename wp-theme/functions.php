@@ -83,3 +83,21 @@ add_filter( 'body_class', function ( $c ) {
 	}
 	return $c;
 } );
+
+/*
+ * Fallback for domain-verification files (Enamad etc.): if a file listed in
+ * site-root/ is requested but missing on the host, serve it from the theme.
+ */
+add_action( 'init', function () {
+	$path = trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' ); // phpcs:ignore
+	if ( ! preg_match( '/^[0-9]{4,20}\.txt$/', $path ) ) {
+		return;
+	}
+	$file = BZK_DIR . '/verify/' . $path;
+	if ( file_exists( $file ) ) {
+		status_header( 200 );
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		readfile( $file ); // phpcs:ignore
+		exit;
+	}
+}, 0 );
