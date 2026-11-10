@@ -121,3 +121,39 @@ function bzk_shop_cats() {
 }
 add_action( 'woocommerce_before_shop_loop', 'bzk_shop_cats', 5 );
 add_action( 'woocommerce_no_products_found', 'bzk_shop_cats', 5 );
+
+/*
+ * Payment gateways (e.g. ZarinPal) redirect to the bank from the
+ * "order-pay" receipt page, after the page has started printing.
+ * Some hosts (LiteSpeed) send headers early, so the redirect is lost and
+ * the page stops half-way. Buffering this page keeps the redirect working.
+ */
+add_action( 'template_redirect', function () {
+	if ( function_exists( 'is_checkout_pay_page' ) && is_checkout_pay_page() && ! isset( $_GET['pay_for_order'] ) ) { // phpcs:ignore
+		ob_start();
+	}
+}, 0 );
+
+/*
+ * If the gateway can't start the payment it only adds a notice, which the
+ * receipt page never prints. Show it, plus a "try again" button.
+ */
+add_action( 'template_redirect', function () {
+	if ( ! function_exists( 'is_checkout_pay_page' ) || ! is_checkout_pay_page() || isset( $_GET['pay_for_order'] ) ) { // phpcs:ignore
+		return;
+	}
+	$order = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+	if ( ! $order ) {
+		return;
+	}
+	add_action( 'woocommerce_receipt_' . $order->get_payment_method(), function () use ( $order ) {
+		if ( ! wc_notice_count() ) {
+			return;
+		}
+		echo '<div class="bzk-pay-error">';
+		wc_print_notices();
+		echo '<p>اتصال به درگاه پرداخت انجام نشد. چند لحظه بعد دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.</p>';
+		echo '<a class="button" href="' . esc_url( $order->get_checkout_payment_url() ) . '">تلاش دوباره برای پرداخت</a>';
+		echo '</div>';
+	}, 99 );
+}, 1 );
