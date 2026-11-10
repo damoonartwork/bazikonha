@@ -12,6 +12,7 @@ require BZK_DIR . '/inc/helpers.php';
 require BZK_DIR . '/inc/customizer.php';
 require BZK_DIR . '/inc/woocommerce.php';
 require BZK_DIR . '/inc/setup-content.php';
+require BZK_DIR . '/inc/email-verify.php';
 
 /* ---------- Theme supports ---------- */
 add_action( 'after_setup_theme', function () {
