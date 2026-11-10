@@ -1,8 +1,10 @@
 ---
 # cPanel > Git Version Control > "Deploy HEAD Commit" runs these tasks.
-# Only the WordPress theme (wp-theme/) is copied to the host.
+# - wp-theme/  -> the WordPress theme
+# - site-root/ -> files that must sit in the site root (e.g. Enamad domain check)
 deployment:
   tasks:
     - export DEPLOYPATH=$HOME/public_html/wp-content/themes/bazikonha/
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -R wp-theme/. $DEPLOYPATH
+    - /bin/cp -R site-root/. $HOME/public_html/
